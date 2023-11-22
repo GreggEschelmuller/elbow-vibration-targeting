@@ -9,10 +9,6 @@ import os
 import nidaqmx
 from daqmx import NIDAQmxInstrument
 
-# To Do:
-# 1. add in visual perturbations (clamp and offset)
-# 2. add code to test vibrations before experiment
-
 # ------------------Blocks to run ------------------
 # Use this to run whole protocol
 # make sure the strings match the names of the sheets in the excel
