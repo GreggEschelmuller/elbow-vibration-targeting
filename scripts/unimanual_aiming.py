@@ -15,15 +15,9 @@ import nidaqmx
 # ------------------Blocks to run ------------------
 # Use this to run whole protocol
 # make sure the strings match the names of the sheets in the excel
-# ExpBlocks = [
-#     "Practice",
-#     "Baseline", 
-#     "Exposure",
-#     "Post"
-#     ]
 
 # For testing a few trials
-ExpBlocks = ["Baseline"]
+ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
@@ -176,7 +170,7 @@ for block in range(len(ExpBlocks)):
     block_data = copy.deepcopy(trial_summary_data_template)
 
     # starts NI DAQ task for data collection and output
-    input_task.start()
+    # input_task.start()
     output_task.start()
 
     for i in range(len(condition.trial_num)):
@@ -204,6 +198,7 @@ for block in range(len(ExpBlocks)):
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
 
         # Run trial
+        input_task.start()
         input(f"Press enter to start trial # {i+1} ... ")
         rand_wait = np.random.randint(300, 701)
         current_trial["trial_delay"].append(rand_wait / 1000)
@@ -296,6 +291,7 @@ for block in range(len(ExpBlocks)):
         block_data["target"].append(target_amplitude)
 
         del current_trial, position_data
+        input_task.stop()
 
     # End of bock saving
     print("Saving Data")
@@ -311,7 +307,7 @@ for block in range(len(ExpBlocks)):
     print("Data Succesfully Saved")
 
     del condition, trial_data, block_data
-    input_task.stop()
+    # input_task.stop()
     output_task.stop()
     input("Press enter to continue to next block ... ")
 

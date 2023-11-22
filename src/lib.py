@@ -44,12 +44,12 @@ def get_x(task):
         vals = task.read(
             number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
         )
-        if vals == None:
+        if len(vals[0]) == 0:
             continue
-        elif not vals == None:
+        else:
             x_data = vals[0]
             y_data = vals[1]
-
+            
             # If buffer contains multiple data points take the lastest one
             if len(x_data) > 1:
                 x_data = [x_data[-1]]
