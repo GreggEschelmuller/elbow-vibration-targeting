@@ -7,6 +7,7 @@ from datetime import datetime
 import copy
 import os
 import nidaqmx
+from daqmx import NIDAQmxInstrument
 
 # To Do:
 # 1. add in visual perturbations (clamp and offset)
@@ -91,13 +92,13 @@ timeLimit = 2
 
 # Create NI channels
 # Inputs
-input_task = nidaqmx.Task()
-input_task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
-input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
-input_task.timing.cfg_samp_clk_timing(
-    fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
-)
-
+# input_task = nidaqmx.Task()
+# input_task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
+# # input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
+# input_task.timing.cfg_samp_clk_timing(
+#     fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
+# )
+input_task = NIDAQmxInstrument()
 # Outputs - have to create separate tasks for input/output
 output_task = nidaqmx.Task()
 output_task.do_channels.add_do_chan("Dev1/port0/line0")
@@ -198,7 +199,7 @@ for block in range(len(ExpBlocks)):
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
 
         # Run trial
-        input_task.start()
+        # input_task.start()
         input(f"Press enter to start trial # {i+1} ... ")
         rand_wait = np.random.randint(300, 701)
         current_trial["trial_delay"].append(rand_wait / 1000)
@@ -291,7 +292,8 @@ for block in range(len(ExpBlocks)):
         block_data["target"].append(target_amplitude)
 
         del current_trial, position_data
-        input_task.stop()
+        # input_task.stop()
+        # input_task.close()
 
     # End of bock saving
     print("Saving Data")
@@ -311,6 +313,6 @@ for block in range(len(ExpBlocks)):
     output_task.stop()
     input("Press enter to continue to next block ... ")
 
-input_task.close()
+# input_task.close()
 output_task.close()
 print("Experiment Done")

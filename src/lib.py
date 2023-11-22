@@ -6,7 +6,7 @@ The experiment is coded in psychopy. The functions and code were written by Greg
 import numpy as np
 import pandas as pd
 import nidaqmx
-
+from daqmx import NIDAQmxInstrument
 
 # 24 inch diag - resololution 1920x1080
 # 0.596736 m arc length
@@ -38,38 +38,47 @@ def exp_filt(pos0, pos1, alpha=0.5):
     y = (pos0[1] * alpha) + (pos1[1] * (1 - alpha))
     return [x, y]
 
+def get_x(daq):
+    x = daq.ai0.value
+    print(x)
+    x *= -1997.4
+    x += 4733.8
+    return [x, 0]  
 
-def get_x(task):
-    while True:
-        vals = task.read(
-            number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
-        )
-        if len(vals[0]) == 0:
-            continue
-        else:
-            x_data = vals[0]
-            y_data = vals[1]
+
+# def get_x(task):
+#     while True:
+#         vals = task.read(
+#             number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
+#         )
+#         # print(vals)
+#         if len(vals) == 0:
+#             continue
+#         else:
+#             x_data = vals
+#             # print(len(vals))
+#             # y_data = vals[1]
             
-            # If buffer contains multiple data points take the lastest one
-            if len(x_data) > 1:
-                x_data = [x_data[-1]]
-            if len(y_data) > 1:
-                y_data = [y_data[-1]]
+#             # If buffer contains multiple data points take the lastest one
+#             # if len(x_data) > 1:
+#             #     x_data = [x_data[-1]]
+#             # if len(y_data) > 1:
+#             #     y_data = [y_data[-1]]
 
-            # I don't remember why this check is here, but it doesn't work without it
-            if not len(vals[0]) == 0:
-                # Offset cursor to middle position
-                # x = 5 - (x_data[0] + 2.7)
-                x = x_data[0]
-                # print(f"Volatage is {x}")
-                y = y_data[0] - 2.3
+#             # # I don't remember why this check is here, but it doesn't work without it
+#             # if not len(vals[0]) == 0:
+#                 # Offset cursor to middle position
+#                 # x = 5 - (x_data[0] + 2.7)
+#             x = x_data[-1]
+#             # print(f"Volatage is {x}")
+#             # y = y_data[0] - 2.3
 
-                # Cursor calibration - October 18, 2023
-                x *= -1997.4
-                x += 4733.8
+#             # Cursor calibration - October 18, 2023
+#             x *= -1997.4
+#             x += 4733.8
 
-                y *= 1
-                return [x, 0]
+#             # y *= 1
+#             return [x, 0]
             
  
 

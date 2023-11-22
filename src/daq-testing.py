@@ -5,8 +5,8 @@ import numpy as np
 import nidaqmx
 import src.lib as lib
 
-# api = 'daqmx'
-api = 'nidaq'
+api = 'daqmx'
+# api = 'nidaq'
 fs = 500
 
 if api == 'daqmx':
@@ -39,7 +39,7 @@ if api == 'daqmx':
 elif api == 'nidaq':
     input_task = nidaqmx.Task()
     input_task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
-    input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
+    # input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
     input_task.timing.cfg_samp_clk_timing(
     fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
     )
