@@ -14,6 +14,42 @@ from daqmx import NIDAQmxInstrument
 # total degrees 34.19
 
 
+def configure_input(fs):
+    task = nidaqmx.Task()
+    task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
+    task.timing.cfg_samp_clk_timing(
+        fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
+    )
+    return task
+
+
+def configure_output():
+    task = nidaqmx.Task()
+    task.do_channels.add_do_chan("Dev1/port0/line0")
+    task.do_channels.add_do_chan("Dev1/port0/line1")
+    return task
+
+
+def generate_trial_dict():
+    template = {
+        "trial_num": [],
+        "move_times": [],
+        "elbow_end": [],
+        "curs_end": [],
+        "error": [],
+        "block": [],
+        "trial_delay": [],
+        "target": [],
+    }
+    return template
+
+
+def generate_position_dict():
+    position_data_template = {
+        "elbow_pos": [],
+        "pot_volts": [],
+        "time": [],
+    }
 
 
 def cm_to_pixel(cm):
@@ -38,12 +74,32 @@ def exp_filt(pos0, pos1, alpha=0.5):
     y = (pos0[1] * alpha) + (pos1[1] * (1 - alpha))
     return [x, y]
 
-def get_x(daq):
-    x = daq.ai0.value
-    print(x)
-    x *= -1997.4
-    x += 4733.8
-    return [x, 0]  
+
+# For daqmx
+# def get_x(daq):
+#     x = daq.ai0.value
+#     print(x)
+#     x *= -1997.4
+#     x += 4733.8
+#     return [x, 0]
+
+
+def get_x(task):
+    while True:
+        data = task.read(
+            number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
+        )
+
+        if len(data) == 0:
+            continue
+        else:
+            return data
+
+
+def volt_to_pix(data):
+    data *= -1997.4
+    data += 4733.8
+    return data
 
 
 # def get_x(task):
@@ -58,7 +114,7 @@ def get_x(daq):
 #             x_data = vals
 #             # print(len(vals))
 #             # y_data = vals[1]
-            
+
 #             # If buffer contains multiple data points take the lastest one
 #             # if len(x_data) > 1:
 #             #     x_data = [x_data[-1]]
@@ -79,8 +135,6 @@ def get_x(daq):
 
 #             # y *= 1
 #             return [x, 0]
-            
- 
 
 
 def contains(small_circ, large_circ):
@@ -125,8 +179,13 @@ def save_position_data(data_dict, int_cursor, current_pos, current_time):
     data_dict["elbow_pos"].append(current_pos[0])
     data_dict["time"].append(current_time)
     if len(data_dict["elbow_pos"]) > 1:
-        data_dict['velocity'].append((round(data_dict['elbow_pos'][-1], 2) -  round(data_dict['elbow_pos'][-2], 2)) \
-            / (1/500))
+        data_dict["velocity"].append(
+            (
+                round(data_dict["elbow_pos"][-1], 2)
+                - round(data_dict["elbow_pos"][-2], 2)
+            )
+            / (1 / 500)
+        )
     else:
-        data_dict['velocity'].append(0)
+        data_dict["velocity"].append(0)
     return data_dict

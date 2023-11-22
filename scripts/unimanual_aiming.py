@@ -90,24 +90,6 @@ home_range_size = home_size * 5
 fs = 500
 timeLimit = 2
 
-# Create NI channels
-# Inputs
-# input_task = nidaqmx.Task()
-# input_task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
-# # input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
-# input_task.timing.cfg_samp_clk_timing(
-#     fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
-# )
-input_task = NIDAQmxInstrument()
-# Outputs - have to create separate tasks for input/output
-output_task = nidaqmx.Task()
-output_task.do_channels.add_do_chan("Dev1/port0/line0")
-output_task.do_channels.add_do_chan("Dev1/port0/line1")
-
-
-# Create data structs
-# For single trial
-
 ## Psychopy set up
 # Create window
 win = visual.Window(
@@ -141,23 +123,6 @@ target = visual.Rect(
     fillColor=None,
 )
 
-# Data dicts for storing data
-trial_summary_data_template = {
-    "trial_num": [],
-    "move_times": [],
-    "elbow_end": [],
-    "curs_end": [],
-    "error": [],
-    "block": [],
-    "trial_delay": [],
-    "target": [],
-}
-
-# For online position data
-position_data_template = {
-    "elbow_pos": [],
-    "time": [],
-}
 
 print("Done set up")
 
@@ -168,16 +133,12 @@ for block in range(len(ExpBlocks)):
     file_ext = ExpBlocks[block]
 
     # Summary data dictionaries for this block
-    block_data = copy.deepcopy(trial_summary_data_template)
-
-    # starts NI DAQ task for data collection and output
-    # input_task.start()
-    output_task.start()
+    block_data = lib.generate_trial_dict
 
     for i in range(len(condition.trial_num)):
         # Creates dictionary for single trial
-        current_trial = copy.deepcopy(trial_summary_data_template)
-        position_data = copy.deepcopy(position_data_template)
+        current_trial = lib.generate_trial_dict
+        position_data = lib.generate_position_dict
 
         # Set up vibration output
         if condition.vibration[i] == 0:
@@ -185,9 +146,9 @@ for block in range(len(ExpBlocks)):
         elif condition.vibration[i] == 1:
             vib_output = [True, True]
         elif condition.vibration[i] == 2:
-            vib_output = [True, False] # BICEPS
+            vib_output = [True, False]  # BICEPS
         elif condition.vibration[i] == 3:
-            vib_output = [False, True] # TRICEPS
+            vib_output = [False, True]  # TRICEPS
 
         int_cursor.color = None
         int_cursor.draw()
@@ -199,17 +160,24 @@ for block in range(len(ExpBlocks)):
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
 
         # Run trial
-        # input_task.start()
+
+        # configure input/output
+        input_task = lib.configure_input(fs)
+        output_task = lib.configure_output()
+
         input(f"Press enter to start trial # {i+1} ... ")
+
+        # start daq tasks for input/output
+        input_task.start()
+        output_task.start()
+
+        # randomly delay trial start
         rand_wait = np.random.randint(300, 701)
         current_trial["trial_delay"].append(rand_wait / 1000)
         block_data["trial_delay"].append(rand_wait / 1000)
         trial_delay_clock.reset()
         while trial_delay_clock.getTime() < rand_wait / 1000:
-            current_time = trial_delay_clock.getTime()
             current_pos = lib.get_x(input_task)
-            position_data["elbow_pos"].append(current_pos[0])
-            position_data["time"].append(current_time)
 
         if not condition.full_feedback[i]:
             int_cursor.color = None
@@ -226,13 +194,15 @@ for block in range(len(ExpBlocks)):
         while move_clock.getTime() < timeLimit:
             # Run trial
             current_time = move_clock.getTime()
-            current_pos = lib.get_x(input_task)
+            pot_data = lib.get_x(input_task)
+            current_pos = [lib.volt_to_pix(pot_data[-1]), 0]
             target.draw()
             lib.set_position(current_pos, int_cursor)
             win.flip()
 
             # Save position data
             position_data["elbow_pos"].append(current_pos[0])
+            position_data["pot_volts"].append(pot_data[-1])
             position_data["time"].append(current_time)
 
         # if current_vel <= 20:
@@ -245,10 +215,12 @@ for block in range(len(ExpBlocks)):
             win.flip()
 
         # Leave current window for 200ms
+        input_task.stop()
         core.wait(0.2, hogCPUperiod=0.2)
         int_cursor.color = None
         int_cursor.draw()
         win.flip()
+        input_task.close()
 
         # Print trial information
         print(f"Trial {i+1} done.")
@@ -292,8 +264,6 @@ for block in range(len(ExpBlocks)):
         block_data["target"].append(target_amplitude)
 
         del current_trial, position_data
-        # input_task.stop()
-        # input_task.close()
 
     # End of bock saving
     print("Saving Data")
