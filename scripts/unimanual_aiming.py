@@ -7,7 +7,8 @@ from datetime import datetime
 import copy
 import os
 import nidaqmx
-from daqmx import NIDAQmxInstrument
+import matplotlib.pyplot as plt
+# from daqmx import NIDAQmxInstrument
 
 # ------------------Blocks to run ------------------
 # Use this to run whole protocol
@@ -122,6 +123,8 @@ target = visual.Rect(
 
 print("Done set up")
 
+timing = []
+timing_clock = core.Clock()
 # -------------- start main experiment loop ------------------------------------
 input("Press enter to continue to first block ... ")
 for block in range(len(ExpBlocks)):
@@ -129,12 +132,12 @@ for block in range(len(ExpBlocks)):
     file_ext = ExpBlocks[block]
 
     # Summary data dictionaries for this block
-    block_data = lib.generate_trial_dict
+    block_data = lib.generate_trial_dict()
 
     for i in range(len(condition.trial_num)):
         # Creates dictionary for single trial
-        current_trial = lib.generate_trial_dict
-        position_data = lib.generate_position_dict
+        current_trial = lib.generate_trial_dict()
+        position_data = lib.generate_position_dict()
 
         # Set up vibration output
         if condition.vibration[i] == 0:
@@ -172,7 +175,7 @@ for block in range(len(ExpBlocks)):
         current_trial["trial_delay"].append(rand_wait / 1000)
         block_data["trial_delay"].append(rand_wait / 1000)
         trial_delay_clock.reset()
-        while trial_delay_clock.getTime() < rand_wait / 1000:
+        while trial_delay_clock.getTime() < (rand_wait / 1000):
             current_pos = lib.get_x(input_task)
 
         if not condition.full_feedback[i]:
@@ -188,6 +191,8 @@ for block in range(len(ExpBlocks)):
         # run trial until time limit is reached or target is reached
         move_clock.reset()
         while move_clock.getTime() < timeLimit:
+            timing_clock.reset()
+            
             # Run trial
             current_time = move_clock.getTime()
             pot_data = lib.get_x(input_task)
@@ -196,10 +201,12 @@ for block in range(len(ExpBlocks)):
             lib.set_position(current_pos, int_cursor)
             win.flip()
 
+            
             # Save position data
             position_data["elbow_pos"].append(current_pos[0])
             position_data["pot_volts"].append(pot_data[-1])
             position_data["time"].append(current_time)
+            timing.append(timing_clock.getTime())
 
         # if current_vel <= 20:
         output_task.write([False, False])
@@ -212,6 +219,7 @@ for block in range(len(ExpBlocks)):
 
         # Leave current window for 200ms
         input_task.stop()
+        output_task.stop()
         core.wait(0.2, hogCPUperiod=0.2)
         int_cursor.color = None
         int_cursor.draw()
@@ -282,3 +290,12 @@ for block in range(len(ExpBlocks)):
 # input_task.close()
 output_task.close()
 print("Experiment Done")
+
+# histogram of timing
+print(f"mean timing = {round(np.mean(timing)*1000, 3)}")
+print(f"std timing = {round(np.std(timing)*1000,3)}")
+print(f"length of timing = {len(timing)}")
+print(f"sampling rate = {len(timing)/timeLimit}")
+plt.figure()
+plt.hist(timing, bins=100)
+plt.show()

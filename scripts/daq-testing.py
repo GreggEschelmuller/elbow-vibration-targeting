@@ -1,13 +1,23 @@
 from daqmx import NIDAQmxInstrument
-from psychopy import core
+from psychopy import core, visual
 import matplotlib.pyplot as plt
 import numpy as np
 import nidaqmx
 import src.lib as lib
 
-api = 'daqmx'
-# api = 'nidaq'
+# api = 'daqmx'
+api = 'nidaq'
 fs = 500
+
+win = visual.Window(
+    fullscr=True,
+    monitor="testMonitor",
+    units="pix",
+    color="black",
+    waitBlanking=False,
+    screen=1,
+    size=[1920, 1080],
+)
 
 if api == 'daqmx':
     daq = NIDAQmxInstrument()
@@ -49,10 +59,12 @@ elif api == 'nidaq':
     voltages = []
     collection_timer.reset
     input_task.start()
-    while collection_timer.getTime() < 5:
+    while collection_timer.getTime() < 2:
         timer.reset()
         voltages.append(lib.get_x(input_task))
+        # print(lib.get_x(input_task))
         times.append(timer.getTime())
+        win.flip()
     input_task.stop()
     input_task.close()
 
@@ -61,7 +73,7 @@ elif api == 'nidaq':
     std_time = np.std(times)
     print(f"Mean time: {mean_time*1000} ms")
     print(f"Number of samples: {num_samples}")
-    print(f"Sampling rate: {num_samples/5} Hz")
+    print(f"Sampling rate: {num_samples/2} Hz")
     print(f"Standard deviation: {std_time*1000} ms")
     plt.figure()
     plt.hist(times*1000, bins=100)

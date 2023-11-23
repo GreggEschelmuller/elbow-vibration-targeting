@@ -15,6 +15,7 @@ from daqmx import NIDAQmxInstrument
 
 
 def configure_input(fs):
+    print("input task configured")
     task = nidaqmx.Task()
     task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
     task.timing.cfg_samp_clk_timing(
@@ -45,11 +46,12 @@ def generate_trial_dict():
 
 
 def generate_position_dict():
-    position_data_template = {
+    template = {
         "elbow_pos": [],
         "pot_volts": [],
         "time": [],
     }
+    return template
 
 
 def cm_to_pixel(cm):
