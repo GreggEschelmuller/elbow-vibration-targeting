@@ -80,12 +80,13 @@ print("Setting everything up...")
 # ------------------------ Set up --------------------------------
 
 # Variables set up
-cursor_size = 0.075
-target_size = 0.3
-home_size = 0.15
-home_range_size = home_size * 5
+cursor_size = 0.5
+target_size = 1.5
+home_range_upper = lib.volt_to_pix(4.65)
+home_range_lower = lib.volt_to_pix(4.99)
 fs = 500
 timeLimit = 2
+# Home position in volts = 4.9
 
 ## Psychopy set up
 # Create window
@@ -104,27 +105,32 @@ win = visual.Window(
 move_clock = core.Clock()
 home_clock = core.Clock()
 trial_delay_clock = core.Clock()
+rt_clock = core.Clock()
+
+home_indicator = visual.Circle(    
+    win, 
+    radius = lib.cm_to_pixel(1),
+    fillColor = 'red',
+    pos = [0,100])
+
 
 int_cursor = visual.Rect(
     win,
     width=lib.cm_to_pixel(cursor_size),
-    height=lib.cm_to_pixel(20),
+    height=lib.cm_to_pixel(60),
     fillColor="Black",
 )
 
 target = visual.Rect(
     win,
     width=lib.cm_to_pixel(target_size),
-    height=lib.cm_to_pixel(20),
+    height=lib.cm_to_pixel(60),
     lineColor="red",
     fillColor=None,
 )
 
 
 print("Done set up")
-
-timing = []
-timing_clock = core.Clock()
 # -------------- start main experiment loop ------------------------------------
 input("Press enter to continue to first block ... ")
 for block in range(len(ExpBlocks)):
@@ -154,7 +160,7 @@ for block in range(len(ExpBlocks)):
         win.flip()
 
         # Sets up target position
-        target_jitter = np.random.uniform(-0.25, 0.25)  # jitter target position
+        target_jitter = np.random.uniform(-0.5, 0.5)  # jitter target position
         target_amplitude = condition.target_amp[i] + target_jitter
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
 
@@ -164,49 +170,90 @@ for block in range(len(ExpBlocks)):
         input_task = lib.configure_input(fs)
         output_task = lib.configure_output()
 
-        input(f"Press enter to start trial # {i+1} ... ")
-
         # start daq tasks for input/output
         input_task.start()
         output_task.start()
+        # input(f"Press enter to start trial # {i+1} ... ")
+
+        in_home_timer = core.Clock()
+        current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
+        print("waiting for home position")
+        while True:
+            home_indicator.color = 'red'
+            home_indicator.draw()
+            win.flip()
+            pot_data = lib.get_x(input_task)
+            new_pos = lib.volt_to_pix(pot_data[-1])
+            current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            if current_pos[0] > home_range_lower and current_pos[0] < home_range_upper:
+                in_home_timer.reset()
+                home_indicator.color = 'green'
+                home_indicator.draw()
+                win.flip()
+                print("cursor in home position")
+                break
+
+
 
         # randomly delay trial start
-        rand_wait = np.random.randint(300, 701)
+        rand_wait = np.random.randint(600, 1000)
         current_trial["trial_delay"].append(rand_wait / 1000)
         block_data["trial_delay"].append(rand_wait / 1000)
         trial_delay_clock.reset()
+        print(f"rand delay is {rand_wait / 1000} seconds")
         while trial_delay_clock.getTime() < (rand_wait / 1000):
-            current_pos = lib.get_x(input_task)
+            continue
 
         if not condition.full_feedback[i]:
-            int_cursor.color = None
+            int_cursor.color = 'Black'
 
         # Start vibration
         output_task.write(vib_output)
 
         # Display target position
+        home_indicator.color = 'black'
         lib.set_position(current_target_pos, target)
         win.flip()
+        print("Target position displayed")
 
+        rt_clock.reset()
+        current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
+        while True:
+            pot_data = lib.get_x(input_task)
+            new_pos = lib.volt_to_pix(pot_data[-1])
+            current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            if current_pos[0] > home_range_upper:
+                print(current_pos[0])
+                print(home_range_lower)
+                break
+
+        print(f"rt clock is {round(rt_clock.getTime()*1000, 2)}")
+        print("Cursor left home, trial started")
         # run trial until time limit is reached or target is reached
         move_clock.reset()
+        current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
+        velocities = []
         while move_clock.getTime() < timeLimit:
-            timing_clock.reset()
-            
+            previous_position= current_pos
+
             # Run trial
             current_time = move_clock.getTime()
             pot_data = lib.get_x(input_task)
-            current_pos = [lib.volt_to_pix(pot_data[-1]), 0]
+            new_pos = lib.volt_to_pix(pot_data[-1])
+            current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
             target.draw()
             lib.set_position(current_pos, int_cursor)
             win.flip()
-
+            current_vel = current_pos[0] - previous_position[0]
+            velocities.append(current_vel)
             
-            # Save position data
+             # Save position data
             position_data["elbow_pos"].append(current_pos[0])
             position_data["pot_volts"].append(pot_data[-1])
             position_data["time"].append(current_time)
-            timing.append(timing_clock.getTime())
+
+            if np.mean(velocities[-10:]) < 0.05 and current_time > 0.5:
+                break
 
         # if current_vel <= 20:
         output_task.write([False, False])
@@ -287,15 +334,6 @@ for block in range(len(ExpBlocks)):
     output_task.stop()
     input("Press enter to continue to next block ... ")
 
-# input_task.close()
+input_task.close()
 output_task.close()
 print("Experiment Done")
-
-# histogram of timing
-print(f"mean timing = {round(np.mean(timing)*1000, 3)}")
-print(f"std timing = {round(np.std(timing)*1000,3)}")
-print(f"length of timing = {len(timing)}")
-print(f"sampling rate = {len(timing)/timeLimit}")
-plt.figure()
-plt.hist(timing, bins=100)
-plt.show()

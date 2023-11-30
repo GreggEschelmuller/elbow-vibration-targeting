@@ -15,7 +15,6 @@ from daqmx import NIDAQmxInstrument
 
 
 def configure_input(fs):
-    print("input task configured")
     task = nidaqmx.Task()
     task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
     task.timing.cfg_samp_clk_timing(
@@ -55,11 +54,11 @@ def generate_position_dict():
 
 
 def cm_to_pixel(cm):
-    return cm * 207.2386
+    return int((cm /2.54) * 81.59)
 
 
 def pixel_to_cm(pix):
-    return pix / 207.2386
+    return (pix / 81.59) * 2.54
 
 
 def read_trial_data(file_name, sheet=0):
@@ -72,9 +71,8 @@ def make_rot_mat(theta):
 
 
 def exp_filt(pos0, pos1, alpha=0.5):
-    x = (pos0[0] * alpha) + (pos1[0] * (1 - alpha))
-    y = (pos0[1] * alpha) + (pos1[1] * (1 - alpha))
-    return [x, y]
+    x = (pos0 * alpha) + (pos1 * (1 - alpha))
+    return x
 
 
 # For daqmx
@@ -91,16 +89,17 @@ def get_x(task):
         data = task.read(
             number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
         )
-
         if len(data) == 0:
             continue
         else:
+            # print(data)
             return data
 
 
 def volt_to_pix(data):
-    data *= -1997.4
-    data += 4733.8
+    # Calibration done on November 29, 2023
+    data *= -2258.9
+    data += 9076.7
     return data
 
 
