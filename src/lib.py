@@ -34,19 +34,24 @@ def generate_trial_dict():
     template = {
         "trial_num": [],
         "move_times": [],
-        "elbow_end": [],
-        "curs_end": [],
+        "elbow_end_cm": [],
+        "elbow_end_deg": [],
+        "curs_end_cm": [],
+        "curs_end_deg": [],
         "error": [],
         "block": [],
         "trial_delay": [],
-        "target": [],
+        "target_cm": [],
+        "target_deg": [],
+        "rt": [],
     }
     return template
 
 
 def generate_position_dict():
     template = {
-        "elbow_pos": [],
+        "elbow_pos_pix": [],
+        "elbow_pos_deg": [],
         "pot_volts": [],
         "time": [],
     }
@@ -54,12 +59,40 @@ def generate_position_dict():
 
 
 def cm_to_pixel(cm):
-    return int((cm /2.54) * 81.59)
+    return (cm /2.54) * 81.59
 
 
 def pixel_to_cm(pix):
     return (pix / 81.59) * 2.54
 
+
+def pixel_to_volt(data):
+    data -= 9076.7
+    data /= -2258.9
+    return data
+
+def volt_to_pix(data):
+    # Calibration done on November 29, 2023
+    data *= -2258.9
+    data += 9076.7
+    return data
+
+
+def volt_to_deg(volt):
+    return -62.692*volt + 363.76
+
+
+def cm_to_deg(data):
+    data = cm_to_pixel(data)
+    data = pixel_to_volt(data)
+    data = volt_to_deg(data)
+    # return volt_to_deg(pixel_to_volt(cm_to_pixel(data)))
+    return data
+
+def pixel_to_deg(data):
+    data = pixel_to_volt(data)
+    data = volt_to_deg(data)
+    return data
 
 def read_trial_data(file_name, sheet=0):
     # Reads in the trial data from the excel file
@@ -75,15 +108,6 @@ def exp_filt(pos0, pos1, alpha=0.5):
     return x
 
 
-# For daqmx
-# def get_x(daq):
-#     x = daq.ai0.value
-#     print(x)
-#     x *= -1997.4
-#     x += 4733.8
-#     return [x, 0]
-
-
 def get_x(task):
     while True:
         data = task.read(
@@ -94,48 +118,6 @@ def get_x(task):
         else:
             # print(data)
             return data
-
-
-def volt_to_pix(data):
-    # Calibration done on November 29, 2023
-    data *= -2258.9
-    data += 9076.7
-    return data
-
-
-# def get_x(task):
-#     while True:
-#         vals = task.read(
-#             number_of_samples_per_channel=nidaqmx.constants.READ_ALL_AVAILABLE
-#         )
-#         # print(vals)
-#         if len(vals) == 0:
-#             continue
-#         else:
-#             x_data = vals
-#             # print(len(vals))
-#             # y_data = vals[1]
-
-#             # If buffer contains multiple data points take the lastest one
-#             # if len(x_data) > 1:
-#             #     x_data = [x_data[-1]]
-#             # if len(y_data) > 1:
-#             #     y_data = [y_data[-1]]
-
-#             # # I don't remember why this check is here, but it doesn't work without it
-#             # if not len(vals[0]) == 0:
-#                 # Offset cursor to middle position
-#                 # x = 5 - (x_data[0] + 2.7)
-#             x = x_data[-1]
-#             # print(f"Volatage is {x}")
-#             # y = y_data[0] - 2.3
-
-#             # Cursor calibration - October 18, 2023
-#             x *= -1997.4
-#             x += 4733.8
-
-#             # y *= 1
-#             return [x, 0]
 
 
 def contains(small_circ, large_circ):
@@ -163,30 +145,3 @@ def calc_amplitude(pos):
     # Calculates the amplitude of the cursor relative to middle
     amp = np.sqrt(np.dot(pos, pos))
     return amp
-
-
-def save_end_point(data_dict, current_time, current_pos, int_cursor, condition, t_num):
-    data_dict["move_times"].append(current_time)
-    data_dict["elbow_end"].append(current_pos[0])
-    data_dict["curs_end"].append(int_cursor.pos[0])
-    data_dict["target_pos"].append(condition.target_pos[t_num])
-    data_dict["rotation"].append(condition.rotation[t_num])
-    data_dict["vibration"].append(condition.vibration[t_num])
-    return data_dict
-
-
-def save_position_data(data_dict, int_cursor, current_pos, current_time):
-    data_dict["curs_pos"].append(int_cursor.pos[0])
-    data_dict["elbow_pos"].append(current_pos[0])
-    data_dict["time"].append(current_time)
-    if len(data_dict["elbow_pos"]) > 1:
-        data_dict["velocity"].append(
-            (
-                round(data_dict["elbow_pos"][-1], 2)
-                - round(data_dict["elbow_pos"][-2], 2)
-            )
-            / (1 / 500)
-        )
-    else:
-        data_dict["velocity"].append(0)
-    return data_dict

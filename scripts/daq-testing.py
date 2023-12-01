@@ -59,24 +59,30 @@ elif api == 'nidaq':
     voltages = []
     collection_timer.reset
     input_task.start()
-    while collection_timer.getTime() < 2:
+    while collection_timer.getTime() < 1:
         timer.reset()
-        voltages.append(lib.get_x(input_task))
+        voltages.append(lib.get_x(input_task)[-1])
         # print(lib.get_x(input_task))
         times.append(timer.getTime())
         win.flip()
     input_task.stop()
     input_task.close()
 
-    mean_time = np.mean(times)
-    num_samples = len(times)
-    std_time = np.std(times)
-    print(f"Mean time: {mean_time*1000} ms")
-    print(f"Number of samples: {num_samples}")
-    print(f"Sampling rate: {num_samples/2} Hz")
-    print(f"Standard deviation: {std_time*1000} ms")
-    plt.figure()
-    plt.hist(times*1000, bins=100)
-    # plt.axvline(mean_time*1000, color='k', linestyle='dashed', linewidth=1)
-    plt.show()
+mean_volts = np.mean(voltages)
+print(f"Volts: {mean_volts}")
+
+mean_deg = lib.volt_to_deg(mean_volts)
+print(f"Volt to degrees: {mean_deg}")
+
+mean_pix = lib.volt_to_pix(mean_volts)
+print(f"Volt to pixels: {mean_pix}")
+print("")
+
+mean_cm = lib.pixel_to_cm(mean_pix)
+print(f"Pixel to cm: {mean_cm}")
+
+print("")
+cm_to_deg = lib.cm_to_deg(mean_cm)
+print(f"cm to deg: {cm_to_deg}")
+
     
