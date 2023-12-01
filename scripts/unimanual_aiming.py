@@ -16,13 +16,14 @@ import matplotlib.pyplot as plt
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-ExpBlocks = ["Testing"]
+# ExpBlocks = ["Practice"]
+ExpBlocks = ["main"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 99
+participant = 1
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -51,27 +52,27 @@ if not participant == 99:
 # # Check if directory exists and if it is empty
 dir_path = f"data/p{str(participant)}"
 
-if not participant == 99:
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-        print(
-            """
-        Directory didn't exist so one was created. Continuing with program.
-        """
-        )
-    elif len(os.listdir(dir_path)) == 0:
-        print(
-            """
-        Directory already exists and is empty. Continuing with program."""
-        )
-    elif os.path.exists(dir_path) and not len(dir_path) == 0:
-        print(
-            """
-        This directory exists and isn't empty, exiting program.
-        Please check the contents of the directory before continuing.
-        """
-        )
-        exit()
+# if not participant == 99:
+#     if not os.path.exists(dir_path):
+#         os.makedirs(dir_path)
+#         print(
+#             """
+#         Directory didn't exist so one was created. Continuing with program.
+#         """
+#         )
+#     elif len(os.listdir(dir_path)) == 0:
+#         print(
+#             """
+#         Directory already exists and is empty. Continuing with program."""
+#         )
+#     elif os.path.exists(dir_path) and not len(dir_path) == 0:
+#         print(
+#             """
+#         This directory exists and isn't empty, exiting program.
+#         Please check the contents of the directory before continuing.
+#         """
+#         )
+#         exit()
 
 # set up file path
 file_path = f"data/p{str(participant)}/p{str(participant)}"
@@ -202,7 +203,7 @@ for block in range(len(ExpBlocks)):
             continue
 
         if not condition.full_feedback[i]:
-            int_cursor.color = "Black"
+            int_cursor.color = "None"
 
         # Start vibration
         output_task.write(vib_output)
@@ -335,7 +336,7 @@ for block in range(len(ExpBlocks)):
 
     del condition, trial_data, block_data
     # input_task.stop()
-    output_task.stop()
+    # output_task.stop()
     input("Press enter to continue to next block ... ")
 
 input_task.close()
