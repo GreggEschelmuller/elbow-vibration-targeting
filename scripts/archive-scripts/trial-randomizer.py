@@ -2,11 +2,11 @@ import random
 import pandas as pd
 
 # Define your target and vibration conditions
-targets = [2, 3]
-vibrations = [0, 1, 2, 3]
+targets = [8]
+vibrations = [0, 0, 0, 1, 2, 3]
 
 # Number of cycles you want to create
-n_cycles = 40  # Change this to the desired number of cycles
+n_cycles = 30  # Change this to the desired number of cycles
 
 # Initialize a list to store the randomized trials
 all_trials = []
@@ -40,5 +40,5 @@ for _ in range(n_cycles):
 trial_df = pd.DataFrame(all_trials, columns=["Target", "Vibration"])
 
 # Write the DataFrame to an Excel file
-output_excel_file = "../randomized_trials.xlsx"
+output_excel_file = "../../randomized_trials.xlsx"
 trial_df.to_excel(output_excel_file, index=False)
