@@ -250,7 +250,7 @@ for block in range(len(ExpBlocks)):
             position_data["time"].append(current_time)
             position_data["elbow_pos_deg"].append(current_deg)
 
-            if np.mean(velocities[-10:]) < 0.05 and current_time > 0.5:
+            if np.mean(velocities[-20:]) < 0.05 and current_time > 0.5:
                 break
 
         # if current_vel <= 20:
