@@ -4,10 +4,7 @@ import numpy as np
 import pandas as pd
 import src.lib as lib
 from datetime import datetime
-import copy
 import os
-import nidaqmx
-import matplotlib.pyplot as plt
 
 # from daqmx import NIDAQmxInstrument
 
@@ -87,7 +84,7 @@ target_size = 1.5
 home_range_upper = lib.volt_to_pix(4.75)
 home_range_lower = lib.volt_to_pix(4.99)
 fs = 500
-timeLimit = 2
+time_limit = 2
 # Home position in volts = 4.9
 
 ## Psychopy set up
@@ -231,7 +228,7 @@ for block in range(len(ExpBlocks)):
         move_clock.reset()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
         velocities = []
-        while move_clock.getTime() < timeLimit:
+        while move_clock.getTime() < time_limit:
             previous_position = current_pos
 
             # Run trial
