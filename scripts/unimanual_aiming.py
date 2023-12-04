@@ -141,6 +141,8 @@ for block in range(len(ExpBlocks)):
     block_data = lib.generate_trial_dict()
 
     for i in range(len(condition.trial_num)):
+        print(" ")
+        print(f"Starting trial {i+1}")
         # Creates dictionary for single trial
         current_trial = lib.generate_trial_dict()
         position_data = lib.generate_position_dict()
@@ -160,7 +162,7 @@ for block in range(len(ExpBlocks)):
         win.flip()
 
         # Sets up target position
-        target_jitter = np.random.uniform(-0.5, 0.5)  # jitter target position
+        target_jitter = np.random.uniform(-1.5, 1.5)  # jitter target position
         target_amplitude = condition.target_amp[i] + target_jitter
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
 
@@ -271,6 +273,7 @@ for block in range(len(ExpBlocks)):
         input_task.close()
 
         # Print trial information
+        print(" ")
         print(f"Trial {i+1} done.")
         print(f"Movement time: {round((current_time*1000),1)} ms")
         print(
