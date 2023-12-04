@@ -108,6 +108,7 @@ move_clock = core.Clock()
 home_clock = core.Clock()
 trial_delay_clock = core.Clock()
 rt_clock = core.Clock()
+display_clock = core.Clock()
 
 home_indicator = visual.Circle(
     win, radius=lib.cm_to_pixel(1), fillColor="red", pos=[0, 100]
@@ -266,11 +267,25 @@ for block in range(len(ExpBlocks)):
         # Leave current window for 200ms
         input_task.stop()
         output_task.stop()
-        core.wait(0.2, hogCPUperiod=0.2)
+        display_clock.reset()
+
+        # Display feedback for 500ms and collect rest of data
+        while display_clock.getTime() < 0.5:
+            current_time = move_clock.getTime()
+            pot_data = lib.get_x(input_task)
+            current_deg = lib.volt_to_deg(pot_data[-1])
+            new_pos = lib.volt_to_pix(pot_data[-1])
+            current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            # Save position data
+            position_data["elbow_pos_pix"].append(current_pos[0])
+            position_data["pot_volts"].append(pot_data[-1])
+            position_data["time"].append(current_time)
+            position_data["elbow_pos_deg"].append(current_deg)
+
+        input_task.close()
         int_cursor.color = None
         int_cursor.draw()
         win.flip()
-        input_task.close()
 
         # Print trial information
         print(" ")
