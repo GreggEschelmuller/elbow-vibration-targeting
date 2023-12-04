@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-# ExpBlocks = ["Practice"]
-ExpBlocks = ["main"]
+ExpBlocks = ["practice"]
+ExpBlocks = ["baseline", "main", "post"]
 
 # ----------- Participant info ----------------
 
@@ -52,27 +52,27 @@ if not participant == 99:
 # # Check if directory exists and if it is empty
 dir_path = f"data/p{str(participant)}"
 
-# if not participant == 99:
-#     if not os.path.exists(dir_path):
-#         os.makedirs(dir_path)
-#         print(
-#             """
-#         Directory didn't exist so one was created. Continuing with program.
-#         """
-#         )
-#     elif len(os.listdir(dir_path)) == 0:
-#         print(
-#             """
-#         Directory already exists and is empty. Continuing with program."""
-#         )
-#     elif os.path.exists(dir_path) and not len(dir_path) == 0:
-#         print(
-#             """
-#         This directory exists and isn't empty, exiting program.
-#         Please check the contents of the directory before continuing.
-#         """
-#         )
-#         exit()
+if ExpBlocks[0] == "practice":
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+        print(
+            """
+        Directory didn't exist so one was created. Continuing with program.
+        """
+        )
+    elif len(os.listdir(dir_path)) == 0:
+        print(
+            """
+        Directory already exists and is empty. Continuing with program."""
+        )
+    elif os.path.exists(dir_path) and not len(dir_path) == 0:
+        print(
+            """
+        This directory exists and isn't empty, exiting program.
+        Please check the contents of the directory before continuing.
+        """
+        )
+        exit()
 
 # set up file path
 file_path = f"data/p{str(participant)}/p{str(participant)}"
@@ -194,7 +194,7 @@ for block in range(len(ExpBlocks)):
                 break
 
         # randomly delay trial start
-        rand_wait = np.random.randint(600, 1000)
+        rand_wait = np.random.randint(2000, 3000)
         current_trial["trial_delay"].append(rand_wait / 1000)
         block_data["trial_delay"].append(rand_wait / 1000)
         trial_delay_clock.reset()
@@ -212,7 +212,6 @@ for block in range(len(ExpBlocks)):
         home_indicator.color = "black"
         lib.set_position(current_target_pos, target)
         win.flip()
-        print("Target position displayed")
 
         rt_clock.reset()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
