@@ -262,8 +262,7 @@ for block in range(len(ExpBlocks)):
             win.flip()
 
         # Leave current window for 200ms
-        input_task.stop()
-        output_task.stop()
+
         display_clock.reset()
 
         # Display feedback for 500ms and collect rest of data
@@ -279,7 +278,10 @@ for block in range(len(ExpBlocks)):
             position_data["time"].append(current_time)
             position_data["elbow_pos_deg"].append(current_deg)
 
+        input_task.stop()
+        output_task.stop()
         input_task.close()
+        output_task.close()
         int_cursor.color = None
         int_cursor.draw()
         win.flip()
@@ -353,6 +355,4 @@ for block in range(len(ExpBlocks)):
     # output_task.stop()
     input("Press enter to continue to next block ... ")
 
-input_task.close()
-output_task.close()
 print("Experiment Done")
