@@ -84,7 +84,7 @@ target_size = 1.5
 home_range_upper = lib.volt_to_pix(4.75)
 home_range_lower = lib.volt_to_pix(4.99)
 fs = 500
-time_limit = 2
+time_limit = 4
 # Home position in volts = 4.9
 
 ## Psychopy set up
@@ -213,7 +213,7 @@ for block in range(len(ExpBlocks)):
         lib.set_position(current_target_pos, target)
         win.flip()
 
-        rt_clock.reset()
+        move_clock.reset()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
         while True:
             pot_data = lib.get_x(input_task)
@@ -221,11 +221,10 @@ for block in range(len(ExpBlocks)):
             current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
             if current_pos[0] > home_range_upper:
                 break
-        rt = rt_clock.getTime()
+        rt = move_clock.getTime()
 
         print("Cursor left home, trial started")
         # run trial until time limit is reached or target is reached
-        move_clock.reset()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
         velocities = []
         while move_clock.getTime() < time_limit:
@@ -289,7 +288,7 @@ for block in range(len(ExpBlocks)):
         # Print trial information
         print(" ")
         print(f"Trial {i+1} done.")
-        print(f"Movement time: {round((current_time*1000),1)} ms")
+        print(f"Movement time: {round(((current_time - rt)*1000),1)} ms")
         print(
             f"Target position: {round(lib.cm_to_deg(condition.target_amp[i]), 3)} deg    Cursor Position: {round(current_deg,3)} deg"
         )
@@ -299,7 +298,7 @@ for block in range(len(ExpBlocks)):
         print(" ")
 
         # Write and save data for individual trial
-        current_trial["move_times"].append(current_time)
+        current_trial["move_times"].append(current_time - rt)
         current_trial["elbow_end_cm"].append(lib.pixel_to_cm(current_pos[0]))
         current_trial["elbow_end_deg"].append(current_deg)
         current_trial["curs_end_cm"].append(lib.pixel_to_cm(int_cursor.pos[0]))
