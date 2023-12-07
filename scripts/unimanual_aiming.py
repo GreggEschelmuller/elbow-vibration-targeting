@@ -15,13 +15,13 @@ import os
 # For testing a few trials
 # ExpBlocks = ["practice"]
 # ExpBlocks = ["baseline", "main", "post"]
-ExpBlocks = ["Testing"]
+# ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 98
+participant = 1
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -142,7 +142,7 @@ for block in range(len(ExpBlocks)):
     for i in range(len(condition.trial_num)):
         print(" ")
         print(f"Starting trial {i+1}")
-        # Creates dictionary for single trial
+                # Creates dictionary for single trial
         current_trial = lib.generate_trial_dict()
         position_data = lib.generate_position_dict()
 
@@ -164,6 +164,7 @@ for block in range(len(ExpBlocks)):
         target_jitter = np.random.uniform(-1.5, 1.5)  # jitter target position
         target_amplitude = condition.target_amp[i] + target_jitter
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
+        target_amp_degree = lib.pixel_to_deg(current_target_pos[0])
 
         # Run trial
 
@@ -264,6 +265,18 @@ for block in range(len(ExpBlocks)):
             target.draw()
             win.flip()
 
+        final_time = current_time
+
+        final_volt_elbow = pot_data[-1]
+        final_pix_elbow = new_pos
+        final_cm_elbow = lib.pixel_to_cm(final_pix_elbow)
+        final_deg_elbow = current_deg
+
+        final_pix_curs = int_cursor.pos[0]
+        final_cm_curs = lib.pixel_to_cm(final_pix_curs)
+        final_deg_curs = lib.pixel_to_deg(final_pix_curs)
+
+
         display_clock.reset()
 
         # Display feedback for 500ms and collect rest of data
@@ -282,36 +295,42 @@ for block in range(len(ExpBlocks)):
         input_task.stop()
         output_task.stop()
         input_task.close()
+        output_task.close()
         int_cursor.color = None
         int_cursor.draw()
         win.flip()
 
         # Print trial information
-        print(" ")
         print(f"Trial {i+1} done.")
         print(f"Movement time: {round((current_time*1000),1)} ms")
         print(
-            f"Target position: {round(lib.cm_to_deg(condition.target_amp[i]), 3)} deg    Cursor Position: {round(current_deg,3)} deg"
+            f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(current_deg,3)} deg"
         )
         print(
-            f"Error: {round(current_deg - lib.cm_to_deg(condition.target_amp[i]), 3)} deg"
+            f"Error: {round(current_deg - target_amp_degree, 3)} deg"
         )
         print(" ")
 
         # Write and save data for individual trial
-        current_trial["move_times"].append(current_time)
-        current_trial["elbow_end_cm"].append(lib.pixel_to_cm(current_pos[0]))
-        current_trial["elbow_end_deg"].append(current_deg)
-        current_trial["curs_end_cm"].append(lib.pixel_to_cm(int_cursor.pos[0]))
-        current_trial["curs_end_deg"].append(lib.pixel_to_deg(int_cursor.pos[0]))
-        current_trial["error"].append(
-            current_deg - lib.cm_to_deg(condition.target_amp[i])
-        )
         current_trial["trial_num"].append(i + 1)
+        current_trial["move_times"].append(final_time)
+
+        current_trial['elbow_end_volts'].append(final_volt_elbow)
+        current_trial['elbow_end_pix'].append(final_pix_elbow)
+        current_trial["elbow_end_cm"].append(final_cm_elbow)
+        current_trial["elbow_end_deg"].append(final_deg_elbow)
+
+        current_trial["cursor_end_pix"].append(final_pix_curs)
+        current_trial["curs_end_cm"].append(final_cm_curs)
+        current_trial["curs_end_deg"].append(final_deg_curs)
+
+        current_trial["error"].append(current_deg -target_amp_degree)
         current_trial["block"].append(ExpBlocks[block])
         current_trial["target_cm"].append(target_amplitude)
-        current_trial["target_deg"].append(lib.cm_to_deg(target_amplitude))
+        current_trial["target_deg"].append(target_amp_degree)
+        current_trial["target_pix"].append(target.pos[0])
         current_trial["rt"].append(rt)
+
         # Save data to CSV
         pd.DataFrame.from_dict(current_trial).to_csv(
             f"{file_path}_trial_{str(i+1)}_{file_ext}.csv", index=False
@@ -321,16 +340,22 @@ for block in range(len(ExpBlocks)):
         )
 
         # Append data for whole block
-        block_data["move_times"].append(current_time)
-        block_data["elbow_end_cm"].append(lib.pixel_to_cm(current_pos[0]))
-        block_data["elbow_end_deg"].append(current_deg)
-        block_data["curs_end_cm"].append(lib.pixel_to_cm(int_cursor.pos[0]))
-        block_data["curs_end_deg"].append(lib.pixel_to_deg(int_cursor.pos[0]))
-        block_data["error"].append(current_deg - lib.cm_to_deg(condition.target_amp[i]))
         block_data["trial_num"].append(i + 1)
+        block_data["move_times"].append(final_time)
+        block_data['elbow_end_volts'].append(final_volt_elbow)
+        block_data['elbow_end_pix'].append(final_pix_elbow)
+        block_data["elbow_end_cm"].append(final_cm_elbow)
+        block_data["elbow_end_deg"].append(final_deg_elbow)
+
+        block_data["cursor_end_pix"].append(final_pix_curs)
+        block_data["curs_end_cm"].append(final_cm_curs)
+        block_data["curs_end_deg"].append(final_deg_curs)
+
+        block_data["error"].append(current_deg -target_amp_degree)
         block_data["block"].append(ExpBlocks[block])
         block_data["target_cm"].append(target_amplitude)
-        block_data["target_deg"].append(lib.cm_to_deg(target_amplitude))
+        block_data["target_deg"].append(target_amp_degree)
+        block_data["target_pix"].append(target.pos[0])
         block_data["rt"].append(rt)
 
         del current_trial, position_data
@@ -355,6 +380,4 @@ for block in range(len(ExpBlocks)):
     # output_task.stop()
     input("Press enter to continue to next block ... ")
 
-input_task.close()
-output_task.close()
 print("Experiment Done")

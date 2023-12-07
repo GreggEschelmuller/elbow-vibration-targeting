@@ -11,9 +11,9 @@ if condition == 1:
 elif condition == 2:
     vib_output = [True, True]
 elif condition == 3:
-    vib_output = [True, False]  # BICEPS
+    vib_output = [True, False]  # TRCIEPS
 elif condition == 4:
-    vib_output = [False, True]  # TRICEPS
+    vib_output = [False, True]  # BICEPS
 
 timer = core.Clock()
 

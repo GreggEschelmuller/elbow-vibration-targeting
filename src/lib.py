@@ -34,8 +34,11 @@ def generate_trial_dict():
     template = {
         "trial_num": [],
         "move_times": [],
+        "elbow_end_volts": [],
+        "elbow_end_pix": [],
         "elbow_end_cm": [],
         "elbow_end_deg": [],
+        "cursor_end_pix": [],
         "curs_end_cm": [],
         "curs_end_deg": [],
         "error": [],
@@ -43,6 +46,7 @@ def generate_trial_dict():
         "trial_delay": [],
         "target_cm": [],
         "target_deg": [],
+        "target_pix": [],
         "rt": [],
     }
     return template
@@ -73,8 +77,8 @@ def pixel_to_volt(data):
 
 def volt_to_pix(data):
     # Calibration done on November 29, 2023
-    data *= -2256
-    data += 8738.7
+    data *= -2173.1
+    data += 8515.8
     return data
 
 
