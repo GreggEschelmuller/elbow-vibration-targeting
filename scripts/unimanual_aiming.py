@@ -13,7 +13,7 @@ import os
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-# ExpBlocks = ["practice"]
+ExpBlocks = ["practice"]
 # ExpBlocks = ["baseline", "main", "post"]
 # ExpBlocks = ["Testing"]
 
