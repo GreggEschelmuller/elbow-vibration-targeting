@@ -13,14 +13,15 @@ import os
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-ExpBlocks = ["practice"]
-ExpBlocks = ["baseline", "main", "post"]
+# ExpBlocks = ["practice"]
+# ExpBlocks = ["baseline", "main", "post"]
+ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 1
+participant = 98
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -37,7 +38,7 @@ study_info = {
 }
 # experiment_info = pd.DataFrame.from_dict(study_info)
 
-if not participant == 99:
+if ExpBlocks[0] == "practice":
     print(study_info)
     input(
         """
@@ -194,7 +195,7 @@ for block in range(len(ExpBlocks)):
                 break
 
         # randomly delay trial start
-        rand_wait = np.random.randint(2000, 3000)
+        rand_wait = np.random.randint(1500, 2500)
         current_trial["trial_delay"].append(rand_wait / 1000)
         block_data["trial_delay"].append(rand_wait / 1000)
         trial_delay_clock.reset()
@@ -204,6 +205,8 @@ for block in range(len(ExpBlocks)):
 
         if not condition.full_feedback[i]:
             int_cursor.color = "None"
+        elif condition.full_feedback[i]:
+            int_cursor.color = "Green"
 
         # Start vibration
         output_task.write(vib_output)
@@ -261,9 +264,6 @@ for block in range(len(ExpBlocks)):
             target.draw()
             win.flip()
 
-        # Leave current window for 200ms
-        input_task.stop()
-        output_task.stop()
         display_clock.reset()
 
         # Display feedback for 500ms and collect rest of data
@@ -279,6 +279,8 @@ for block in range(len(ExpBlocks)):
             position_data["time"].append(current_time)
             position_data["elbow_pos_deg"].append(current_deg)
 
+        input_task.stop()
+        output_task.stop()
         input_task.close()
         int_cursor.color = None
         int_cursor.draw()
