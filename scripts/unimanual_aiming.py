@@ -142,7 +142,7 @@ for block in range(len(ExpBlocks)):
     for i in range(len(condition.trial_num)):
         print(" ")
         print(f"Starting trial {i+1}")
-                # Creates dictionary for single trial
+        # Creates dictionary for single trial
         current_trial = lib.generate_trial_dict()
         position_data = lib.generate_position_dict()
 
@@ -152,9 +152,9 @@ for block in range(len(ExpBlocks)):
         elif condition.vibration[i] == 1:
             vib_output = [True, True]
         elif condition.vibration[i] == 2:
-            vib_output = [True, False]  # BICEPS
+            vib_output = [True, False]  # Triceps
         elif condition.vibration[i] == 3:
-            vib_output = [False, True]  # TRICEPS
+            vib_output = [False, True]  # Biceps
 
         int_cursor.color = None
         int_cursor.draw()
@@ -288,7 +288,6 @@ for block in range(len(ExpBlocks)):
         final_cm_curs = lib.pixel_to_cm(final_pix_curs)
         final_deg_curs = lib.pixel_to_deg(final_pix_curs)
 
-
         display_clock.reset()
 
         # Display feedback for 500ms and collect rest of data
@@ -318,17 +317,15 @@ for block in range(len(ExpBlocks)):
         print(
             f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(final_deg_curs,3)} deg"
         )
-        print(
-            f"Error: {round(final_deg_curs - target_amp_degree, 3)} deg"
-        )
+        print(f"Error: {round(final_deg_curs - target_amp_degree, 3)} deg")
         print(" ")
 
         # Write and save data for individual trial
         current_trial["trial_num"].append(i + 1)
         current_trial["move_times"].append(final_time)
 
-        current_trial['elbow_end_volts'].append(final_volt_elbow)
-        current_trial['elbow_end_pix'].append(final_pix_elbow)
+        current_trial["elbow_end_volts"].append(final_volt_elbow)
+        current_trial["elbow_end_pix"].append(final_pix_elbow)
         current_trial["elbow_end_cm"].append(final_cm_elbow)
         current_trial["elbow_end_deg"].append(final_deg_elbow)
 
@@ -336,7 +333,7 @@ for block in range(len(ExpBlocks)):
         current_trial["curs_end_cm"].append(final_cm_curs)
         current_trial["curs_end_deg"].append(final_deg_curs)
 
-        current_trial["error"].append(final_deg_curs -target_amp_degree)
+        current_trial["error"].append(final_deg_curs - target_amp_degree)
         current_trial["block"].append(ExpBlocks[block])
         current_trial["target_cm"].append(target_amplitude)
         current_trial["target_deg"].append(target_amp_degree)
@@ -354,8 +351,8 @@ for block in range(len(ExpBlocks)):
         # Append data for whole block
         block_data["trial_num"].append(i + 1)
         block_data["move_times"].append(final_time)
-        block_data['elbow_end_volts'].append(final_volt_elbow)
-        block_data['elbow_end_pix'].append(final_pix_elbow)
+        block_data["elbow_end_volts"].append(final_volt_elbow)
+        block_data["elbow_end_pix"].append(final_pix_elbow)
         block_data["elbow_end_cm"].append(final_cm_elbow)
         block_data["elbow_end_deg"].append(final_deg_elbow)
 
@@ -363,7 +360,7 @@ for block in range(len(ExpBlocks)):
         block_data["curs_end_cm"].append(final_cm_curs)
         block_data["curs_end_deg"].append(final_deg_curs)
 
-        block_data["error"].append(current_deg -target_amp_degree)
+        block_data["error"].append(current_deg - target_amp_degree)
         block_data["block"].append(ExpBlocks[block])
         block_data["target_cm"].append(target_amplitude)
         block_data["target_deg"].append(target_amp_degree)
