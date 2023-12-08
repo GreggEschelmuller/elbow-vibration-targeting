@@ -77,8 +77,10 @@ def pixel_to_volt(data):
 
 def volt_to_pix(data):
     # Calibration done on November 29, 2023
-    data *= -2173.1
-    data += 8515.8
+    # data *= -2173.1
+    # data += 8515.8
+    data *= -2256
+    data += 8738.7
     return data
 
 

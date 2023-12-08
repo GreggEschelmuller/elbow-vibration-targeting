@@ -13,15 +13,15 @@ import os
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-ExpBlocks = ["practice"]
-# ExpBlocks = ["baseline", "main", "post"]
+# ExpBlocks = ["practice"]
+ExpBlocks = ["baseline", "main", "post"]
 # ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 1
+participant = 2
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -161,7 +161,7 @@ for block in range(len(ExpBlocks)):
         win.flip()
 
         # Sets up target position
-        target_jitter = np.random.uniform(-1.5, 1.5)  # jitter target position
+        target_jitter = np.random.uniform(-2.5, 2.5)  # jitter target position
         target_amplitude = condition.target_amp[i] + target_jitter
         current_target_pos = lib.calc_target_pos(0, target_amplitude)
         target_amp_degree = lib.pixel_to_deg(current_target_pos[0])
@@ -220,9 +220,22 @@ for block in range(len(ExpBlocks)):
         move_clock.reset()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
         while True:
+            previous_position = current_pos
+
+            current_time = move_clock.getTime()
             pot_data = lib.get_x(input_task)
+            current_deg = lib.volt_to_deg(pot_data[-1])
             new_pos = lib.volt_to_pix(pot_data[-1])
             current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            target.draw()
+            lib.set_position(current_pos, int_cursor)
+            win.flip()
+
+            # Save position data
+            position_data["elbow_pos_pix"].append(current_pos[0])
+            position_data["pot_volts"].append(pot_data[-1])
+            position_data["time"].append(current_time)
+            position_data["elbow_pos_deg"].append(current_deg)
             if current_pos[0] > home_range_upper:
                 break
         rt = move_clock.getTime()
@@ -240,6 +253,7 @@ for block in range(len(ExpBlocks)):
             current_deg = lib.volt_to_deg(pot_data[-1])
             new_pos = lib.volt_to_pix(pot_data[-1])
             current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            # current_pos = [new_pos, 0]
             target.draw()
             lib.set_position(current_pos, int_cursor)
             win.flip()
@@ -252,10 +266,9 @@ for block in range(len(ExpBlocks)):
             position_data["time"].append(current_time)
             position_data["elbow_pos_deg"].append(current_deg)
 
-            if np.mean(velocities[-20:]) < 0.05 and current_time > 0.5:
+            if np.mean(velocities[-20:]) < 0.05 and current_time > rt + 0.3:
                 break
 
-        # if current_vel <= 20:
         output_task.write([False, False])
         # Append trial data to storage variables
         if condition.terminal_feedback[i]:
@@ -264,7 +277,7 @@ for block in range(len(ExpBlocks)):
             target.draw()
             win.flip()
 
-        final_time = current_time
+        final_time = current_time - rt
 
         final_volt_elbow = pot_data[-1]
         final_pix_elbow = new_pos
@@ -293,10 +306,7 @@ for block in range(len(ExpBlocks)):
 
         input_task.stop()
         output_task.stop()
-        input_task.stop()
-        output_task.stop()
         input_task.close()
-        output_task.close()
         output_task.close()
         int_cursor.color = None
         int_cursor.draw()
@@ -304,12 +314,12 @@ for block in range(len(ExpBlocks)):
 
         # Print trial information
         print(f"Trial {i+1} done.")
-        print(f"Movement time: {round(((current_time - rt)*1000),1)} ms")
+        print(f"Movement time: {round(((final_time)*1000),1)} ms")
         print(
-            f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(current_deg,3)} deg"
+            f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(final_deg_curs,3)} deg"
         )
         print(
-            f"Error: {round(current_deg - target_amp_degree, 3)} deg"
+            f"Error: {round(final_deg_curs - target_amp_degree, 3)} deg"
         )
         print(" ")
 
@@ -326,7 +336,7 @@ for block in range(len(ExpBlocks)):
         current_trial["curs_end_cm"].append(final_cm_curs)
         current_trial["curs_end_deg"].append(final_deg_curs)
 
-        current_trial["error"].append(current_deg -target_amp_degree)
+        current_trial["error"].append(final_deg_curs -target_amp_degree)
         current_trial["block"].append(ExpBlocks[block])
         current_trial["target_cm"].append(target_amplitude)
         current_trial["target_deg"].append(target_amp_degree)
