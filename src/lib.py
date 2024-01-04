@@ -16,7 +16,7 @@ from daqmx import NIDAQmxInstrument
 
 def configure_input(fs):
     task = nidaqmx.Task()
-    task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
+    task.ai_channels.add_ai_voltage_chan("Dev2/ai0", min_val=0, max_val=5)
     task.timing.cfg_samp_clk_timing(
         fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
     )
@@ -71,21 +71,22 @@ def pixel_to_cm(pix):
 
 
 def pixel_to_volt(data):
-    data -= 9076.7
-    data /= -2258.9
+    data -= 8682.1
+    data /= -2241
     return data
 
 def volt_to_pix(data):
-    # Calibration done on November 29, 2023
-    # data *= -2173.1
-    # data += 8515.8
-    data *= -2256
-    data += 8738.7
+    data *= -2241
+    data += 8682.1
+    # data *= -2112.7
+    # data += 8427.3
+    # data *= -2237.6
+    # data += 8721
     return data
 
 
 def volt_to_deg(volt):
-    return -62.692*volt + 363.76
+    return -63.518*volt + 384.28
 
 
 def cm_to_deg(data):
@@ -134,9 +135,9 @@ def contains(small_circ, large_circ):
     return (d + small_circ.radius) < large_circ.radius
 
 
-def set_position(pos, circ):
-    circ.pos = pos
-    circ.draw()
+def set_position(pos, object):
+    object.pos = pos
+    object.draw()
 
 
 def calc_target_pos(angle, amp=8):

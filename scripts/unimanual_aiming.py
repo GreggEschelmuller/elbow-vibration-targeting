@@ -82,8 +82,10 @@ print("Setting everything up...")
 # Variables set up
 cursor_size = 0.5
 target_size = 1.5
-home_range_upper = lib.volt_to_pix(4.75)
-home_range_lower = lib.volt_to_pix(4.99)
+home_range_upper = 600
+home_range_lower = 1000
+# home_range_upper = lib.volt_to_pix(4.75)
+# home_range_lower = lib.volt_to_pix(4.99)
 fs = 500
 time_limit = 4
 # Home position in volts = 4.9
@@ -363,7 +365,7 @@ for block in range(len(ExpBlocks)):
         block_data["curs_end_cm"].append(final_cm_curs)
         block_data["curs_end_deg"].append(final_deg_curs)
 
-        block_data["error"].append(current_deg -target_amp_degree)
+        block_data["error"].append(final_deg_curs -target_amp_degree)
         block_data["block"].append(ExpBlocks[block])
         block_data["target_cm"].append(target_amplitude)
         block_data["target_deg"].append(target_amp_degree)

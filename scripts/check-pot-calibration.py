@@ -5,7 +5,8 @@ import numpy as np
 import nidaqmx
 import src.lib as lib
 
-targets = [-900, -600, -300, 0, 300, 600, 900]
+# targets = [-900, -400, 0, 400, 900]
+targets = [900]
 
 fs = 500
 
