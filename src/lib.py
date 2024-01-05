@@ -59,6 +59,7 @@ def generate_trial_dict():
 
 def generate_position_dict():
     template = {
+        "move_index": [],
         "elbow_pos_pix": [],
         "elbow_pos_deg": [],
         "pot_volts": [],

@@ -232,20 +232,26 @@ for block in range(len(ExpBlocks)):
             target.draw()
             lib.set_position(current_pos, int_cursor)
             win.flip()
-
-            # Save position data
-            position_data["elbow_pos_pix"].append(current_pos[0])
-            position_data["pot_volts"].append(pot_data[-1])
-            position_data["time"].append(current_time)
-            position_data["elbow_pos_deg"].append(current_deg)
             if current_pos[0] > home_range_upper:
+                position_data["move_index"].append(1)
+                position_data["elbow_pos_pix"].append(current_pos[0])
+                position_data["pot_volts"].append(pot_data[-1])
+                position_data["time"].append(current_time)
+                position_data["elbow_pos_deg"].append(current_deg)
                 break
+            else:
+                # Save position data
+                position_data["move_index"].append(0)
+                position_data["elbow_pos_pix"].append(current_pos[0])
+                position_data["pot_volts"].append(pot_data[-1])
+                position_data["time"].append(current_time)
+                position_data["elbow_pos_deg"].append(current_deg)
+
         rt = move_clock.getTime()
         start_volt_elbow = pot_data[-1]
         start_pix_elbow = new_pos
         start_cm_elbow = lib.pixel_to_cm(start_pix_elbow)
         start_deg_elbow = current_deg
-        
 
         print("Cursor left home, trial started")
         # run trial until time limit is reached or target is reached
@@ -268,13 +274,21 @@ for block in range(len(ExpBlocks)):
             velocities.append(current_vel)
 
             # Save position data
-            position_data["elbow_pos_pix"].append(current_pos[0])
-            position_data["pot_volts"].append(pot_data[-1])
-            position_data["time"].append(current_time)
-            position_data["elbow_pos_deg"].append(current_deg)
+
 
             if np.mean(velocities[-20:]) < 0.05 and current_time > rt + 0.3:
+                position_data["move_index"].append(1)
+                position_data["elbow_pos_pix"].append(current_pos[0])
+                position_data["pot_volts"].append(pot_data[-1])
+                position_data["time"].append(current_time)
+                position_data["elbow_pos_deg"].append(current_deg)
                 break
+            else:
+                position_data["move_index"].append(0)
+                position_data["elbow_pos_pix"].append(current_pos[0])
+                position_data["pot_volts"].append(pot_data[-1])
+                position_data["time"].append(current_time)
+                position_data["elbow_pos_deg"].append(current_deg)
 
         output_task.write([False, False])
         # Append trial data to storage variables
@@ -307,6 +321,7 @@ for block in range(len(ExpBlocks)):
             new_pos = lib.volt_to_pix(pot_data[-1])
             current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
             # Save position data
+            position_data["move_index"].append(0)
             position_data["elbow_pos_pix"].append(current_pos[0])
             position_data["pot_volts"].append(pot_data[-1])
             position_data["time"].append(current_time)
