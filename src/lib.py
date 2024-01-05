@@ -16,7 +16,7 @@ from daqmx import NIDAQmxInstrument
 
 def configure_input(fs):
     task = nidaqmx.Task()
-    task.ai_channels.add_ai_voltage_chan("Dev2/ai0", min_val=0, max_val=5)
+    task.ai_channels.add_ai_voltage_chan("Dev1/ai1", min_val=0, max_val=5)
     task.timing.cfg_samp_clk_timing(
         fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
     )
@@ -34,6 +34,10 @@ def generate_trial_dict():
     template = {
         "trial_num": [],
         "move_times": [],
+        "elbow_start_volts": [],
+        "elbow_start_pix": [],
+        "elbow_start_cm": [],
+        "elbow_start_deg": [],
         "elbow_end_volts": [],
         "elbow_end_pix": [],
         "elbow_end_cm": [],
@@ -41,6 +45,7 @@ def generate_trial_dict():
         "cursor_end_pix": [],
         "curs_end_cm": [],
         "curs_end_deg": [],
+        "mean_velocity": [],
         "error": [],
         "block": [],
         "trial_delay": [],

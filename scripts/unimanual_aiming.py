@@ -241,6 +241,11 @@ for block in range(len(ExpBlocks)):
             if current_pos[0] > home_range_upper:
                 break
         rt = move_clock.getTime()
+        start_volt_elbow = pot_data[-1]
+        start_pix_elbow = new_pos
+        start_cm_elbow = lib.pixel_to_cm(start_pix_elbow)
+        start_deg_elbow = current_deg
+        
 
         print("Cursor left home, trial started")
         # run trial until time limit is reached or target is reached
@@ -290,6 +295,8 @@ for block in range(len(ExpBlocks)):
         final_cm_curs = lib.pixel_to_cm(final_pix_curs)
         final_deg_curs = lib.pixel_to_deg(final_pix_curs)
 
+        mean_velocity = (final_deg_elbow - start_deg_elbow) / final_time
+
         display_clock.reset()
 
         # Display feedback for 500ms and collect rest of data
@@ -314,17 +321,24 @@ for block in range(len(ExpBlocks)):
         win.flip()
 
         # Print trial information
+
         print(f"Trial {i+1} done.")
         print(f"Movement time: {round(((final_time)*1000),1)} ms")
         print(
             f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(final_deg_curs,3)} deg"
         )
         print(f"Error: {round(final_deg_curs - target_amp_degree, 3)} deg")
+        print(f"Velocity: {mean_velocity}")
         print(" ")
 
         # Write and save data for individual trial
         current_trial["trial_num"].append(i + 1)
         current_trial["move_times"].append(final_time)
+
+        current_trial["elbow_start_volts"].append(start_volt_elbow)
+        current_trial["elbow_start_pix"].append(start_pix_elbow)
+        current_trial["elbow_start_cm"].append(start_cm_elbow)
+        current_trial["elbow_start_deg"].append(start_deg_elbow)
 
         current_trial["elbow_end_volts"].append(final_volt_elbow)
         current_trial["elbow_end_pix"].append(final_pix_elbow)
@@ -335,6 +349,7 @@ for block in range(len(ExpBlocks)):
         current_trial["curs_end_cm"].append(final_cm_curs)
         current_trial["curs_end_deg"].append(final_deg_curs)
 
+        current_trial['mean_velocity'].append(mean_velocity)
         current_trial["error"].append(final_deg_curs - target_amp_degree)
         current_trial["block"].append(ExpBlocks[block])
         current_trial["target_cm"].append(target_amplitude)
@@ -353,6 +368,12 @@ for block in range(len(ExpBlocks)):
         # Append data for whole block
         block_data["trial_num"].append(i + 1)
         block_data["move_times"].append(final_time)
+
+        block_data["elbow_start_volts"].append(start_volt_elbow)
+        block_data["elbow_start_pix"].append(start_pix_elbow)
+        block_data["elbow_start_cm"].append(start_cm_elbow)
+        block_data["elbow_start_deg"].append(start_deg_elbow)
+
         block_data["elbow_end_volts"].append(final_volt_elbow)
         block_data["elbow_end_pix"].append(final_pix_elbow)
         block_data["elbow_end_cm"].append(final_cm_elbow)
@@ -362,7 +383,8 @@ for block in range(len(ExpBlocks)):
         block_data["curs_end_cm"].append(final_cm_curs)
         block_data["curs_end_deg"].append(final_deg_curs)
 
-        block_data["error"].append(final_deg_curs -target_amp_degree)
+        block_data['mean_velocity'].append(mean_velocity)    
+        block_data["error"].append(final_deg_curs - target_amp_degree)
         block_data["block"].append(ExpBlocks[block])
         block_data["target_cm"].append(target_amplitude)
         block_data["target_deg"].append(target_amp_degree)
