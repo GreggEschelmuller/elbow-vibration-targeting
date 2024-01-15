@@ -1,10 +1,11 @@
 from psychopy import visual, core
+import numpy as  np
 import src.lib as lib
 
 cursor_size = 0.5
 target_size = 1.5
 fs = 500
-time_limit = 20
+time_limit = 1
 
 win = visual.Window(
     fullscr=True,
@@ -12,7 +13,7 @@ win = visual.Window(
     units="pix",
     color="black",
     waitBlanking=False, 
-    screen=1,
+    screen=0,
     size=[1920, 1080],
 )
 
@@ -26,19 +27,14 @@ timer = core.Clock()
 
 input_task = lib.configure_input(fs)
 input_task.start()
-print("calibration started")
+print("starting")
 current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
+volts = []
 while timer.getTime() < time_limit:
-    pot_data = lib.get_x(input_task)
-    current_deg = lib.volt_to_deg(pot_data[-1])
-    new_pos = lib.volt_to_pix(pot_data[-1])
-    current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
-    # print(f"Volts: {pot_data} - Pix: {new_pos} - Deg: {lib.pixel_to_volt(current_deg)}")
-    # current_pos = [new_pos, 0]
-    lib.set_position(current_pos, int_cursor)
-    win.flip()
+    volts.append(lib.get_x(input_task)[-1])
 
 
-print("calibration ended")
+
+print(f"mean volts =  {np.mean(volts)}")
 input_task.stop()
 input_task.close()

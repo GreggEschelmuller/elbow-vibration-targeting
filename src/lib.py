@@ -77,35 +77,31 @@ def pixel_to_cm(pix):
 
 
 def pixel_to_volt(data):
-    data -= 8682.1
-    data /= -2241
+    data -= 9163.8
+    data /= -2584.7
     return data
 
 def volt_to_pix(data):
-    data *= -2241
-    data += 8682.1
-    # data *= -2112.7
-    # data += 8427.3
-    # data *= -2237.6
-    # data += 8721
+    data *= -2584.7
+    data += 9163.8
     return data
 
 
 def volt_to_deg(volt):
-    return -63.518*volt + 384.28
+    return -69.027*volt + 365.28
 
+def pixel_to_deg(data):
+    # data *= 0.0268
+    # data += 119.1
+    data = pixel_to_volt(data)
+    data = volt_to_deg(data)
+    return data
 
 def cm_to_deg(data):
     data = cm_to_pixel(data)
-    data = pixel_to_volt(data)
-    data = volt_to_deg(data)
-    # return volt_to_deg(pixel_to_volt(cm_to_pixel(data)))
+    data = pixel_to_deg(data)
     return data
 
-def pixel_to_deg(data):
-    data = pixel_to_volt(data)
-    data = volt_to_deg(data)
-    return data
 
 def read_trial_data(file_name, sheet=0):
     # Reads in the trial data from the excel file

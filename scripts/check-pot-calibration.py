@@ -5,8 +5,8 @@ import numpy as np
 import nidaqmx
 import src.lib as lib
 
-# targets = [-900, -400, 0, 400, 900]
-targets = [900]
+targets = [-900, -400, 0, 400, 900]
+# targets = [900]
 
 fs = 500
 
@@ -16,7 +16,7 @@ win = visual.Window(
     units="pix",
     color="Black",
     waitBlanking=False,
-    screen=1,
+    screen=0,
     size=[1920, 1080],
 )
 
@@ -35,12 +35,7 @@ for t in targets:
     target.draw()
     win.flip()
     input("Press enter when the manipulandum is aligned")
-    input_task = nidaqmx.Task()
-    input_task.ai_channels.add_ai_voltage_chan("Dev1/ai0", min_val=0, max_val=5)
-    # input_task.ai_channels.add_ai_voltage_chan("Dev1/ai2", min_val=0, max_val=5)
-    input_task.timing.cfg_samp_clk_timing(
-    fs, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS
-    )
+    input_task = lib.configure_input(fs)
     collection_timer = core.Clock()
     voltages = []
     input_task.start()

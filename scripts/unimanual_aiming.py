@@ -14,14 +14,14 @@ import os
 
 # For testing a few trials
 # ExpBlocks = ["practice"]
-ExpBlocks = ["baseline", "main", "post"]
-# ExpBlocks = ["Testing"]
+# ExpBlocks = ["baseline", "main", "post"]
+ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 2
+participant = 99
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -66,11 +66,15 @@ if ExpBlocks[0] == "practice":
     elif os.path.exists(dir_path) and not len(dir_path) == 0:
         print(
             """
-        This directory exists and isn't empty, exiting program.
+        This directory exists and isn't empty.
         Please check the contents of the directory before continuing.
         """
         )
-        exit()
+        ans = input("Would you like to overwrite this data? (y/n)")
+        if ans.lower() == 'y':
+            print("Continuing with program")
+        elif ans.lower() == 'n':
+            exit()
 
 # set up file path
 file_path = f"data/p{str(participant)}/p{str(participant)}"
@@ -82,8 +86,8 @@ print("Setting everything up...")
 # Variables set up
 cursor_size = 0.5
 target_size = 1.5
-home_range_upper = 600
-home_range_lower = 1000
+home_range_upper = -1700
+home_range_lower = -2000
 # home_range_upper = lib.volt_to_pix(4.75)
 # home_range_lower = lib.volt_to_pix(4.99)
 fs = 500
@@ -181,7 +185,7 @@ for block in range(len(ExpBlocks)):
 
         in_home_timer = core.Clock()
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
-        print("waiting for home position")
+        # print("waiting for home position")
         while True:
             home_indicator.color = "red"
             home_indicator.draw()
@@ -194,7 +198,7 @@ for block in range(len(ExpBlocks)):
                 home_indicator.color = "green"
                 home_indicator.draw()
                 win.flip()
-                print("cursor in home position")
+                # print("cursor in home position")
                 break
 
         # randomly delay trial start
@@ -253,7 +257,7 @@ for block in range(len(ExpBlocks)):
         start_cm_elbow = lib.pixel_to_cm(start_pix_elbow)
         start_deg_elbow = current_deg
 
-        print("Cursor left home, trial started")
+        # print("Cursor left home, trial started")
         # run trial until time limit is reached or target is reached
         current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
         velocities = []
@@ -265,7 +269,8 @@ for block in range(len(ExpBlocks)):
             pot_data = lib.get_x(input_task)
             current_deg = lib.volt_to_deg(pot_data[-1])
             new_pos = lib.volt_to_pix(pot_data[-1])
-            current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]
+            filtered_pos = lib.exp_filt(current_pos[0], new_pos)
+            current_pos = [filtered_pos, 0]
             # current_pos = [new_pos, 0]
             target.draw()
             lib.set_position(current_pos, int_cursor)
@@ -301,9 +306,9 @@ for block in range(len(ExpBlocks)):
         final_time = current_time - rt
 
         final_volt_elbow = pot_data[-1]
-        final_pix_elbow = new_pos
+        final_pix_elbow = filtered_pos
         final_cm_elbow = lib.pixel_to_cm(final_pix_elbow)
-        final_deg_elbow = current_deg
+        final_deg_elbow = lib.pixel_to_deg(final_pix_elbow)
 
         final_pix_curs = int_cursor.pos[0]
         final_cm_curs = lib.pixel_to_cm(final_pix_curs)
