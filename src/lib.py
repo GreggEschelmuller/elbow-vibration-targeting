@@ -77,18 +77,18 @@ def pixel_to_cm(pix):
 
 
 def pixel_to_volt(data):
-    data -= 9163.8
-    data /= -2584.7
+    data -= 9150.1
+    data /= -2593.9
     return data
 
 def volt_to_pix(data):
-    data *= -2584.7
-    data += 9163.8
+    data *= -2593.9
+    data += 9150.1
     return data
 
 
 def volt_to_deg(volt):
-    return -69.027*volt + 365.28
+    return -69.366*volt + 364.26
 
 def pixel_to_deg(data):
     # data *= 0.0268

@@ -4,7 +4,7 @@ import src.lib as lib
 cursor_size = 0.5
 target_size = 1.5
 fs = 500
-time_limit = 20
+time_limit = 10
 
 win = visual.Window(
     fullscr=True,

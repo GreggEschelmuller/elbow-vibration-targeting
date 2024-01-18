@@ -13,7 +13,7 @@ win = visual.Window(
     units="pix",
     color="black",
     waitBlanking=False, 
-    screen=0,
+    screen=1,
     size=[1920, 1080],
 )
 
