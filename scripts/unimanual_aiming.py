@@ -14,14 +14,14 @@ import os
 
 # For testing a few trials
 # ExpBlocks = ["practice"]
-# ExpBlocks = ["baseline", "main", "post"]
-ExpBlocks = ["Testing"]
+ExpBlocks = ["baseline", "main", "post"]
+# ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 99
+participant = 1
 
 
 study_id = "Wrist Visuomotor Rotation"
@@ -348,7 +348,7 @@ for block in range(len(ExpBlocks)):
             f"Target position: {round(target_amp_degree, 3)} deg    Cursor Position: {round(final_deg_curs,3)} deg"
         )
         print(f"Error: {round(final_deg_curs - target_amp_degree, 3)} deg")
-        print(f"Velocity: {mean_velocity}")
+        print(f"Velocity: {round(mean_velocity, 2)}")
         print(" ")
 
         # Write and save data for individual trial
