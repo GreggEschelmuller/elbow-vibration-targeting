@@ -155,12 +155,16 @@ for block in range(len(ExpBlocks)):
         # Set up vibration output
         if condition.vibration[i] == 0:
             vib_output = [False, False]
+            print("No vibration")
         elif condition.vibration[i] == 1:
             vib_output = [True, True]
+            print("Dual Vibration")
         elif condition.vibration[i] == 2:
             vib_output = [True, False]  # Triceps
+            print("Triceps Vibration")
         elif condition.vibration[i] == 3:
             vib_output = [False, True]  # Biceps
+            print("Biceps Vibration")
 
         int_cursor.color = None
         int_cursor.draw()
