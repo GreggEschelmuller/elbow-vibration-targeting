@@ -13,15 +13,15 @@ import os
 # make sure the strings match the names of the sheets in the excel
 
 # For testing a few trials
-ExpBlocks = ["practice"]
-# ExpBlocks = ["baseline", "main", "post"]
+# ExpBlocks = ["practice"]
+ExpBlocks = ["baseline", "main", "post"]
 # ExpBlocks = ["Testing"]
 
 # ----------- Participant info ----------------
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 99
+participant = 10
 
 
 study_id = "Wrist Visuomotor Rotation"
