@@ -30,6 +30,7 @@ print("calibration started")
 current_pos = [lib.volt_to_pix(lib.get_x(input_task)[-1]), 0]
 while timer.getTime() < time_limit:
     pot_data = lib.get_x(input_task)
+    # print(pot_data)
     current_deg = lib.volt_to_deg(pot_data[-1])
     new_pos = lib.volt_to_pix(pot_data[-1])
     current_pos = [lib.exp_filt(current_pos[0], new_pos), 0]

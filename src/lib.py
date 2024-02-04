@@ -77,17 +77,15 @@ def pixel_to_cm(pix):
 
 
 def pixel_to_volt(data):
-    data -= 9150.1
+    data -= 9140.1
+    # data -= 9200
     data /= -2593.9
-    # data -= 9130
-    # data /= -2552
     return data
 
 def volt_to_pix(data):
     data *= -2593.9
-    data += 9150.1
-    # data *= -2552
-    # data += 9130
+    data += 9140.1
+    # data += 9200
     return data
 
 

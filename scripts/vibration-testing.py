@@ -2,7 +2,7 @@ import src.lib as lib
 from psychopy import core
 
 output_task = lib.configure_output()
-condition = 3
+condition = 1
 
 output_task.start()
 # Set up vibration output
