@@ -21,7 +21,7 @@ ExpBlocks = ["baseline", "main", "post"]
 
 # For clamp and rotation direction
 rot_direction = 1  # 1 for forwrad, -1 for backward
-participant = 10
+participant = 15
 
 
 study_id = "Wrist Visuomotor Rotation"
